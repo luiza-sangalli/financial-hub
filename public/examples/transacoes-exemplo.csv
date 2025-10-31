@@ -1,0 +1,22 @@
+date,description,amount,type,category
+01/10/2025,Venda de Produto A,1500.00,INCOME,Vendas
+02/10/2025,Aluguel Escritório,2000.00,EXPENSE,Moradia
+03/10/2025,Restaurante Almoço,85.50,EXPENSE,Alimentação
+04/10/2025,Uber Centro-Casa,35.00,EXPENSE,Transporte
+05/10/2025,Salário Outubro,5000.00,INCOME,Salário
+06/10/2025,Conta de Luz,250.00,EXPENSE,Moradia
+07/10/2025,Supermercado Extra,450.00,EXPENSE,Alimentação
+08/10/2025,Gasolina Posto Shell,200.00,EXPENSE,Transporte
+09/10/2025,Netflix Assinatura,45.90,EXPENSE,Lazer
+10/10/2025,Farmácia Remédios,120.00,EXPENSE,Saúde
+11/10/2025,Venda de Serviço,800.00,INCOME,Vendas
+12/10/2025,Internet Fibra,99.90,EXPENSE,Moradia
+13/10/2025,Pizzaria Jantar,95.00,EXPENSE,Alimentação
+14/10/2025,Estacionamento Shopping,15.00,EXPENSE,Transporte
+15/10/2025,Academia Mensalidade,149.90,EXPENSE,Lazer
+16/10/2025,Consulta Médica,300.00,EXPENSE,Saúde
+17/10/2025,Freelance Projeto Web,1200.00,INCOME,Vendas
+18/10/2025,Água Saneago,80.00,EXPENSE,Moradia
+19/10/2025,Padaria Café Manhã,25.00,EXPENSE,Alimentação
+20/10/2025,Uber Eats Delivery,55.00,EXPENSE,Alimentação
+

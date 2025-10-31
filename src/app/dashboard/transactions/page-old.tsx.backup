@@ -1,0 +1,294 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { TransactionFilters } from '@/components/dashboard/transaction-filters'
+import { IncomeExpenseChart } from '@/components/dashboard/income-expense-chart'
+import { IncomeExpenseComparison } from '@/components/dashboard/income-expense-comparison'
+import { CategoryBreakdown } from '@/components/dashboard/category-breakdown'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { DashboardLayoutWithSidebar } from '../layout-with-sidebar'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+
+interface AnalyticsData {
+  success: boolean
+  period: {
+    startDate: string | null
+    endDate: string | null
+  }
+  summary: {
+    totalIncome: number
+    totalExpense: number
+    netResult: number
+    recurringIncome: number
+    recurringExpense: number
+    transactionCount: number
+    averageIncome: number
+    averageExpense: number
+  }
+  monthlyTimeSeries: Array<{
+    month: string
+    income: number
+    expense: number
+    net: number
+    count: number
+  }>
+  topExpenseCategories: Array<{
+    name: string
+    amount: number
+    color: string
+    count: number
+  }>
+  topIncomeCategories: Array<{
+    name: string
+    amount: number
+    color: string
+    count: number
+  }>
+  highlights: {
+    largestIncome: {
+      description: string
+      amount: number
+      date: string
+      category?: string
+    } | null
+    largestExpense: {
+      description: string
+      amount: number
+      date: string
+      category?: string
+    } | null
+  }
+}
+
+export default function TransactionsPage () {
+  const [data, setData] = useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [filters, setFilters] = useState<any>(null)
+
+  useEffect(() => {
+    if (filters) {
+      fetchAnalytics()
+    }
+  }, [filters])
+
+  const fetchAnalytics = async () => {
+    if (!filters) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const params = new URLSearchParams()
+
+      if (filters.startDate) {
+        params.append('startDate', filters.startDate)
+      }
+
+      if (filters.endDate) {
+        params.append('endDate', filters.endDate)
+      }
+
+      if (filters.type && filters.type !== 'all') {
+        params.append('type', filters.type)
+      }
+
+      const res = await fetch(`/api/transactions/analytics?${params}`)
+      const result = await res.json()
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Erro ao carregar dados')
+      }
+
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value)
+  }
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+  }
+
+  return (
+    <DashboardLayoutWithSidebar
+      title="Visualização de Entradas e Saídas"
+      breadcrumbs={[
+        { label: 'Home', href: '/dashboard' },
+        { label: 'Visualização de Transações' }
+      ]}
+    >
+      {/* Erro */}
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar - Filtros */}
+        <div className="lg:col-span-1">
+          <TransactionFilters onFilterChange={setFilters} />
+        </div>
+
+        {/* Conteúdo Principal */}
+        <div className="lg:col-span-3 space-y-6">
+              {/* Resumo Geral */}
+              {data && (
+                <IncomeExpenseComparison
+                  data={data.summary}
+                  loading={loading}
+                />
+              )}
+
+              {/* Gráfico de Evolução */}
+              {data && (
+                <IncomeExpenseChart
+                  data={data.monthlyTimeSeries}
+                  loading={loading}
+                />
+              )}
+
+              {/* Destaques */}
+              {data && (data.highlights.largestIncome || data.highlights.largestExpense) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Destaques do Período</CardTitle>
+                    <CardDescription>
+                      Maior entrada e maior saída registradas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Maior Entrada */}
+                      {data.highlights.largestIncome && (
+                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="text-xs text-green-700 font-medium mb-2">
+                            💰 Maior Entrada
+                          </div>
+                          <div className="text-lg font-bold text-green-700 mb-1">
+                            {formatCurrency(data.highlights.largestIncome.amount)}
+                          </div>
+                          <div className="text-sm text-slate-700 mb-1">
+                            {data.highlights.largestIncome.description}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span>{formatDate(data.highlights.largestIncome.date)}</span>
+                            {data.highlights.largestIncome.category && (
+                              <>
+                                <span>•</span>
+                                <span>{data.highlights.largestIncome.category}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Maior Saída */}
+                      {data.highlights.largestExpense && (
+                        <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                          <div className="text-xs text-red-700 font-medium mb-2">
+                            💸 Maior Saída
+                          </div>
+                          <div className="text-lg font-bold text-red-700 mb-1">
+                            {formatCurrency(data.highlights.largestExpense.amount)}
+                          </div>
+                          <div className="text-sm text-slate-700 mb-1">
+                            {data.highlights.largestExpense.description}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span>{formatDate(data.highlights.largestExpense.date)}</span>
+                            {data.highlights.largestExpense.category && (
+                              <>
+                                <span>•</span>
+                                <span>{data.highlights.largestExpense.category}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Categorias */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Top Despesas por Categoria */}
+                {data && data.topExpenseCategories.length > 0 && (
+                  <CategoryBreakdown
+                    title="Top Categorias - Saídas"
+                    description="Maiores categorias de despesa"
+                    data={data.topExpenseCategories}
+                    type="expense"
+                    loading={loading}
+                  />
+                )}
+
+                {/* Top Receitas por Categoria */}
+                {data && data.topIncomeCategories.length > 0 && (
+                  <CategoryBreakdown
+                    title="Top Categorias - Entradas"
+                    description="Maiores categorias de receita"
+                    data={data.topIncomeCategories}
+                    type="income"
+                    loading={loading}
+                  />
+                )}
+              </div>
+
+              {/* Informações do Período */}
+              {data && data.period.startDate && (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-center gap-2 text-sm text-slate-600">
+                      <span>📅 Período analisado:</span>
+                      <Badge variant="outline">
+                        {formatDate(data.period.startDate)} até {formatDate(data.period.endDate || new Date().toISOString())}
+                      </Badge>
+                      <span>•</span>
+                      <span>{data.summary.transactionCount} transações</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+          {/* Estado vazio */}
+          {!loading && data && data.summary.transactionCount === 0 && (
+            <Card>
+              <CardContent className="py-12">
+                <div className="text-center">
+                  <p className="text-lg text-slate-500 mb-4">
+                    Nenhuma transação encontrada para o período selecionado
+                  </p>
+                  <Link href="/dashboard/import">
+                    <Button>
+                      Importar Transações
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </DashboardLayoutWithSidebar>
+  )
+}
+

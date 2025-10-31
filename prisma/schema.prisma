@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?
+  fullName  String?
+  avatarUrl String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+  
+  // Relacionamentos de auditoria
+  createdTransactions Transaction[] @relation("CreatedTransactions")
+  updatedTransactions Transaction[] @relation("UpdatedTransactions")
+
+  @@map("users")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  users        User[]
+  transactions Transaction[]
+  categories   Category[]
+  files        File[]
+  integrations Integration[]
+
+  @@map("companies")
+}
+
+model Transaction {
+  id          String        @id @default(cuid())
+  amount      Float
+  description String
+  type        TransactionType
+  date        DateTime
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Campos de recorrência
+  isRecurring       Boolean  @default(false)
+  recurrenceRule    Json?
+  parentTransactionId String?
+
+  // Relacionamentos
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id])
+  
+  categoryId  String?
+  category    Category?     @relation(fields: [categoryId], references: [id])
+
+  fileId      String?
+  file        File?         @relation(fields: [fileId], references: [id])
+
+  createdById String?
+  createdBy   User?         @relation("CreatedTransactions", fields: [createdById], references: [id])
+  
+  updatedById String?
+  updatedBy   User?         @relation("UpdatedTransactions", fields: [updatedById], references: [id])
+
+  @@map("transactions")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?  @default("#3B82F6")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  companyId   String
+  company     Company      @relation(fields: [companyId], references: [id])
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model File {
+  id                 String   @id @default(cuid())
+  name               String
+  originalName       String
+  size               Int
+  mimeType           String
+  url                String
+  status             FileStatus @default(PENDING)
+  processedRows      Int?
+  successfulRows     Int?
+  failedRows         Int?
+  errorMessage       String?
+  processedAt        DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relacionamentos
+  companyId          String
+  company            Company @relation(fields: [companyId], references: [id])
+  transactions       Transaction[]
+
+  @@map("files")
+}
+
+model Integration {
+  id          String   @id @default(cuid())
+  name        String
+  type        IntegrationType
+  config      Json
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+
+  @@map("integrations")
+}
+
+enum Role {
+  ADMIN
+  USER
+  VIEWER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum FileStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  ERROR
+}
+
+enum IntegrationType {
+  BANK
+  ERP
+  API
+  WEBHOOK
+}
