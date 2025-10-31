@@ -39,7 +39,7 @@ export async function processCSVFromText (csvText: string): Promise<ProcessedFil
         }
 
         // Processar linhas
-        const rows = results.data.map((row: any, index) => {
+        const rows = (results.data as Array<Record<string, unknown>>).map((row, index) => {
           try {
             return normalizeRow(row, headers)
           } catch (error) {
@@ -57,7 +57,7 @@ export async function processCSVFromText (csvText: string): Promise<ProcessedFil
           errors
         })
       },
-      error: (error) => {
+      error: (error: Error) => {
         reject(new Error(`Erro ao processar CSV: ${error.message}`))
       }
     })
@@ -88,7 +88,7 @@ export async function processCSV (file: File): Promise<ProcessedFileData> {
         }
 
         // Processar linhas
-        const rows = results.data.map((row: any, index) => {
+        const rows = (results.data as Array<Record<string, unknown>>).map((row, index) => {
           try {
             return normalizeRow(row, headers)
           } catch (error) {
@@ -106,7 +106,7 @@ export async function processCSV (file: File): Promise<ProcessedFileData> {
           errors
         })
       },
-      error: (error) => {
+      error: (error: Error) => {
         reject(new Error(`Erro ao processar CSV: ${error.message}`))
       }
     })
@@ -129,7 +129,7 @@ export async function processExcelFromBuffer (buffer: Buffer): Promise<Processed
         return
       }
 
-      const headers = (jsonData[0] as any[]).map(h => String(h))
+      const headers = (jsonData[0] as unknown[]).map(h => String(h))
       const requiredHeaders = ['date', 'description', 'amount', 'type']
       const missingHeaders = requiredHeaders.filter(h => 
         !headers.some(header => String(header).toLowerCase().includes(h))
@@ -144,8 +144,8 @@ export async function processExcelFromBuffer (buffer: Buffer): Promise<Processed
       const rows: TransactionRow[] = []
 
       for (let i = 1; i < jsonData.length; i++) {
-        const rowData = jsonData[i] as any[]
-        const rowObject: any = {}
+        const rowData = jsonData[i] as unknown[]
+        const rowObject: Record<string, unknown> = {}
         
         headers.forEach((header, index) => {
           rowObject[header] = rowData[index]
@@ -198,7 +198,7 @@ export async function processExcel (file: File): Promise<ProcessedFileData> {
           return
         }
 
-        const headers = (jsonData[0] as any[]).map(h => String(h))
+        const headers = (jsonData[0] as unknown[]).map(h => String(h))
         const requiredHeaders = ['date', 'description', 'amount', 'type']
         const missingHeaders = requiredHeaders.filter(h => 
           !headers.some(header => String(header).toLowerCase().includes(h))
@@ -213,8 +213,8 @@ export async function processExcel (file: File): Promise<ProcessedFileData> {
         const rows: TransactionRow[] = []
 
         for (let i = 1; i < jsonData.length; i++) {
-          const rowData = jsonData[i] as any[]
-          const rowObject: any = {}
+          const rowData = jsonData[i] as unknown[]
+          const rowObject: Record<string, unknown> = {}
           
           headers.forEach((header, index) => {
             rowObject[header] = rowData[index]
@@ -252,7 +252,7 @@ export async function processExcel (file: File): Promise<ProcessedFileData> {
 /**
  * Normaliza uma linha de dados
  */
-function normalizeRow (row: any, headers: string[]): TransactionRow {
+function normalizeRow (row: Record<string, unknown>, headers: string[]): TransactionRow {
   // Encontrar os campos corretos (case-insensitive e flexível)
   const findField = (possibleNames: string[]): string | undefined => {
     for (const name of possibleNames) {

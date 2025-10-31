@@ -32,7 +32,7 @@ export default function SignInPage() {
       } else {
         router.push('/dashboard')
       }
-    } catch (error) {
+    } catch {
       setError('Erro ao fazer login')
     } finally {
       setIsLoading(false)

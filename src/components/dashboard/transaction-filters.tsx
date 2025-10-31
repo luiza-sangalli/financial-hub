@@ -39,6 +39,7 @@ export function TransactionFilters ({ onFilterChange }: TransactionFiltersProps)
 
     setFilters(newFilters)
     onFilterChange(newFilters)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handlePeriodChange = (period: FilterValues['period']) => {
@@ -75,7 +76,7 @@ export function TransactionFilters ({ onFilterChange }: TransactionFiltersProps)
   }
 
   const handleDateChange = (field: 'startDate' | 'endDate', value: string) => {
-    const newFilters = { ...filters, [field]: value, period: 'custom' }
+    const newFilters = { ...filters, [field]: value, period: 'custom' as const }
     setFilters(newFilters)
   }
 

@@ -10,7 +10,11 @@ interface Pattern {
   description: string
   transactionIds: string[]
   transactionCount: number
-  suggestedRule: any
+  suggestedRule: {
+    frequency: string
+    interval: number
+    startDate: string
+  }
   confidence: number
   amount: number
   type: string
@@ -44,7 +48,7 @@ export function RecurrenceDetectorCard () {
           text: data.error || 'Erro ao detectar padrões'
         })
       }
-    } catch (error) {
+    } catch {
       setMessage({
         type: 'error',
         text: 'Erro ao detectar padrões'
@@ -83,7 +87,7 @@ export function RecurrenceDetectorCard () {
           text: data.error || 'Erro ao aplicar padrão'
         })
       }
-    } catch (error) {
+    } catch {
       setMessage({
         type: 'error',
         text: 'Erro ao aplicar padrão'
@@ -100,7 +104,7 @@ export function RecurrenceDetectorCard () {
     }).format(Math.abs(value))
   }
 
-  const getFrequencyLabel = (rule: any) => {
+  const getFrequencyLabel = (rule: { frequency: string; interval: number; startDate: string }) => {
     if (!rule) return ''
     
     const labels: Record<string, string> = {

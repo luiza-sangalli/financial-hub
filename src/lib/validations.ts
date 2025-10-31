@@ -71,7 +71,7 @@ export const fileUploadSchema = z.object({
 export const createIntegrationSchema = z.object({
   name: z.string().min(1, 'Nome da integração é obrigatório'),
   type: z.enum(['BANK', 'ERP', 'API', 'WEBHOOK']),
-  config: z.record(z.any()),
+  config: z.record(z.string(), z.unknown()),
   companyId: z.string().min(1, 'ID da empresa é obrigatório'),
 })
 

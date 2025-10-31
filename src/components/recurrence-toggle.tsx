@@ -11,7 +11,6 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 
 interface RecurrenceToggleProps {
   transactionId: string

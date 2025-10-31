@@ -17,7 +17,7 @@ export function FileUpload ({ onUploadComplete }: FileUploadProps) {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [processResult, setProcessResult] = useState<any>(null)
+  const [processResult, setProcessResult] = useState<{ successfulRows?: number; failedRows?: number; total?: number; failed?: number; successful?: number; errors?: Array<{ row: number; message: string }> } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,7 +204,7 @@ export function FileUpload ({ onUploadComplete }: FileUploadProps) {
               <div className="mt-2">
                 <p className="text-xs font-medium text-slate-600 mb-1">Erros encontrados:</p>
                 <div className="space-y-1 max-h-32 overflow-y-auto">
-                  {processResult.errors.map((err: any, idx: number) => (
+                  {processResult.errors.map((err: { row: number; message: string }, idx: number) => (
                     <div key={idx} className="text-xs text-red-600 bg-red-50 p-1 rounded">
                       Linha {err.row}: {err.message}
                     </div>

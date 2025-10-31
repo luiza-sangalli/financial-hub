@@ -64,7 +64,7 @@ export interface RecurrenceRule {
   dayOfWeek?: number
 }
 
-export interface TransactionWithRecurrence extends Transaction {
+export interface TransactionWithRecurrence extends Omit<Transaction, 'recurrenceRule' | 'parentTransactionId'> {
   isRecurring: boolean
   recurrenceRule?: RecurrenceRule | null
   parentTransactionId?: string | null
@@ -110,12 +110,12 @@ export interface FileUploadProgress {
 export interface IntegrationConfig {
   name: string
   type: IntegrationType
-  config: Record<string, any>
+  config: Record<string, unknown>
   isActive: boolean
 }
 
 // Tipos para API responses
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string

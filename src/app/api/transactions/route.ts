@@ -35,7 +35,7 @@ export async function GET (req: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0')
 
     // Filtros
-    const where: any = {
+    const where: Record<string, unknown> = {
       companyId: user.companyId
     }
 
@@ -43,12 +43,17 @@ export async function GET (req: NextRequest) {
       where.fileId = fileId
     }
 
+    const dateFilter: Record<string, Date> = {}
     if (startDate) {
-      where.date = { ...where.date, gte: new Date(startDate) }
+      dateFilter.gte = new Date(startDate)
     }
 
     if (endDate) {
-      where.date = { ...where.date, lte: new Date(endDate) }
+      dateFilter.lte = new Date(endDate)
+    }
+
+    if (Object.keys(dateFilter).length > 0) {
+      where.date = dateFilter
     }
 
     if (type) {
@@ -82,7 +87,7 @@ export async function GET (req: NextRequest) {
         description: t.description,
         type: t.type,
         date: t.date,
-        isRecurring: (t as any).isRecurring || false,
+        isRecurring: t.isRecurring || false,
         category: t.category ? {
           id: t.category.id,
           name: t.category.name,

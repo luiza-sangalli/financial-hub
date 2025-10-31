@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { IconTrendingUp, IconTrendingDown, IconCalendar, IconFilter, IconArrowDown, IconArrowUp } from '@tabler/icons-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
@@ -41,8 +41,8 @@ interface AnalyticsData {
   topExpenseCategories: Array<{ name: string; amount: number }>
   topIncomeCategories: Array<{ name: string; amount: number }>
   highlights: {
-    largestIncome: any | null
-    largestExpense: any | null
+    largestIncome: { description: string; amount: number; date: string; category?: string } | null
+    largestExpense: { description: string; amount: number; date: string; category?: string } | null
   }
 }
 
@@ -72,6 +72,7 @@ export default function TransactionsPage () {
   useEffect(() => {
     setCurrentPage(1) // Reset page quando filtros mudarem
     fetchAnalytics()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [periodFilter, typeFilter])
 
   useEffect(() => {
@@ -102,8 +103,8 @@ export default function TransactionsPage () {
 
       const result = await response.json()
       setData(result)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido')
     } finally {
       setLoading(false)
     }
@@ -137,7 +138,7 @@ export default function TransactionsPage () {
       // Calcular total de páginas
       const total = result.pagination?.total || 0
       setTotalPages(Math.ceil(total / itemsPerPage))
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro ao buscar transações:', err)
     } finally {
       setLoadingTransactions(false)
@@ -219,7 +220,7 @@ export default function TransactionsPage () {
             <IconFilter className="size-5 text-muted-foreground" />
             <span className="text-sm font-medium">Tipo:</span>
           </div>
-          <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
+          <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as 'all' | 'INCOME' | 'EXPENSE')}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>

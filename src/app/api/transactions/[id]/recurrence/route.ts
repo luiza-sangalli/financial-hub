@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function PATCH (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -29,11 +30,12 @@ export async function PATCH (
     }
 
     const { isRecurring, recurrenceRule } = await req.json()
+    const { id } = await params
 
     // Verificar se a transação existe e pertence à empresa do usuário
     const transaction = await prisma.transaction.findFirst({
       where: {
-        id: params.id,
+        id,
         companyId: user.companyId
       }
     })
@@ -47,10 +49,10 @@ export async function PATCH (
 
     // Atualizar transação
     const updated = await prisma.transaction.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         isRecurring,
-        recurrenceRule: isRecurring ? recurrenceRule : null
+        recurrenceRule: isRecurring ? recurrenceRule : Prisma.JsonNull
       },
       include: {
         category: true
@@ -72,7 +74,7 @@ export async function PATCH (
 
 export async function DELETE (
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -95,14 +97,16 @@ export async function DELETE (
       )
     }
 
+    const { id } = await params
+
     // Remover recorrência da transação
     const updated = await prisma.transaction.update({
       where: { 
-        id: params.id
+        id
       },
       data: {
         isRecurring: false,
-        recurrenceRule: null
+        recurrenceRule: Prisma.JsonNull
       }
     })
 

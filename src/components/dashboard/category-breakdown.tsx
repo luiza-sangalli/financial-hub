@@ -68,7 +68,7 @@ export function CategoryBreakdown ({ title, description, data, type, loading }: 
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {data.map((category, index) => {
+          {data.map((category) => {
             const percentage = total > 0 ? (category.amount / total) * 100 : 0
             const barWidth = maxAmount > 0 ? (category.amount / maxAmount) * 100 : 0
 

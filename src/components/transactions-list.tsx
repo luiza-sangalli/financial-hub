@@ -33,11 +33,12 @@ export function TransactionsList ({ fileId, refreshTrigger, limit = 50 }: Transa
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [pagination, setPagination] = useState<any>(null)
+  const [pagination, setPagination] = useState<{ total: number; limit: number; offset: number; hasMore: boolean } | null>(null)
   const [offset, setOffset] = useState(0)
 
   useEffect(() => {
     fetchTransactions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshTrigger, fileId, offset])
 
   const fetchTransactions = async () => {

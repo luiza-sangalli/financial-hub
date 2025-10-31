@@ -33,16 +33,21 @@ export async function GET (req: NextRequest) {
     const type = searchParams.get('type') as 'INCOME' | 'EXPENSE' | null
 
     // Construir filtros
-    const where: any = {
+    const where: Record<string, unknown> = {
       companyId: user.companyId
     }
 
+    const dateFilter: Record<string, Date> = {}
     if (startDate) {
-      where.date = { ...where.date, gte: new Date(startDate) }
+      dateFilter.gte = new Date(startDate)
     }
 
     if (endDate) {
-      where.date = { ...where.date, lte: new Date(endDate) }
+      dateFilter.lte = new Date(endDate)
+    }
+
+    if (Object.keys(dateFilter).length > 0) {
+      where.date = dateFilter
     }
 
     if (categoryId) {
@@ -105,11 +110,11 @@ export async function GET (req: NextRequest) {
 
     // Separar recorrentes e pontuais
     const recurringIncome = transactions
-      .filter(t => t.type === 'INCOME' && (t as any).isRecurring)
+      .filter(t => t.type === 'INCOME' && t.isRecurring)
       .reduce((sum, t) => sum + t.amount, 0)
 
     const recurringExpense = transactions
-      .filter(t => t.type === 'EXPENSE' && (t as any).isRecurring)
+      .filter(t => t.type === 'EXPENSE' && t.isRecurring)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     // Top categorias de despesa

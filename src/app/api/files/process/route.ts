@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
-import { processCSVFromText, processExcelFromBuffer, detectFileType, TransactionRow } from '@/lib/file-processor'
+import { processCSVFromText, processExcelFromBuffer, detectFileType } from '@/lib/file-processor'
 import { categorizeTransaction } from '@/lib/categorizer'
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads')
@@ -106,7 +106,16 @@ export async function POST (req: NextRequest) {
       )
 
       // Preparar transações para inserção
-      const transactionsToCreate: any[] = []
+      const transactionsToCreate: Array<{
+        companyId: string
+        amount: number
+        description: string
+        type: 'INCOME' | 'EXPENSE'
+        date: Date
+        categoryId: string | null
+        fileId: string
+        createdById: string
+      }> = []
       const errors: Array<{ row: number, message: string }> = [...processedData.errors]
       let successCount = 0
 

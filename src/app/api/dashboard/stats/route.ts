@@ -47,20 +47,20 @@ export async function GET () {
 
     // Separar receitas recorrentes e pontuais
     const recurringIncome = transactions
-      .filter(t => t.type === 'INCOME' && (t as any).isRecurring)
+      .filter(t => t.type === 'INCOME' && t.isRecurring)
       .reduce((sum, t) => sum + t.amount, 0)
 
     const oneTimeIncome = transactions
-      .filter(t => t.type === 'INCOME' && !(t as any).isRecurring)
+      .filter(t => t.type === 'INCOME' && !t.isRecurring)
       .reduce((sum, t) => sum + t.amount, 0)
 
     // Separar despesas recorrentes (fixas) e pontuais (variáveis)
     const recurringExpenses = transactions
-      .filter(t => t.type === 'EXPENSE' && (t as any).isRecurring)
+      .filter(t => t.type === 'EXPENSE' && t.isRecurring)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     const oneTimeExpenses = transactions
-      .filter(t => t.type === 'EXPENSE' && !(t as any).isRecurring)
+      .filter(t => t.type === 'EXPENSE' && !t.isRecurring)
       .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 
     const netProfit = totalIncome - totalExpense
@@ -106,7 +106,7 @@ export async function GET () {
         description: t.description,
         type: t.type,
         date: t.date,
-        isRecurring: (t as any).isRecurring || false,
+        isRecurring: t.isRecurring || false,
         category: t.category ? {
           id: t.category.id,
           name: t.category.name,

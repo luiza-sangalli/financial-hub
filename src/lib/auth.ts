@@ -53,23 +53,22 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
-        token.companyId = user.companyId
+        token.role = (user as { role?: string }).role
+        token.companyId = (user as { companyId?: string }).companyId
       }
       return token
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.sub!
-        session.user.role = token.role as string
-        session.user.companyId = token.companyId as string
+      if (token && session.user) {
+        (session.user as { id?: string }).id = token.sub!;
+        (session.user as { role?: string }).role = token.role as string;
+        (session.user as { companyId?: string }).companyId = token.companyId as string
       }
       return session
     }
   },
   pages: {
-    signIn: '/auth/signin',
-    signUp: '/auth/signup',
+    signIn: '/auth/signin'
   },
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development',
 }
